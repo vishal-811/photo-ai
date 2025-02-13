@@ -29,9 +29,6 @@ export function initPassport() {
         profile: any,
         done: (error: any, user?: any) => void
       ) => {
-        const token = Jwt.sign({id : profile.id, name : profile.displayName, email : profile.emails[0].value},process.env.JWT_SECRET!);
-        console.log("token", token);
-
         try {
             const user = Prisma.user.upsert({
                 create :{
