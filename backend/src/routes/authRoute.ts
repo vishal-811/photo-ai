@@ -12,12 +12,12 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
-  (req: Request, res: Response) : any => {
+  (req: Request, res: Response): any => {
     if (!req.user) {
-      return res.redirect("http://localhost:5173/api/v1/auth/google");
+      return res.redirect("http://localhost:5173/login");
     }
-    const user = req.user as { id: string; name: string; email : string };
-  
+    const user = req.user as { id: string; name: string; email: string };
+
     const token = Jwt.sign(
       { id: user.id, name: user.name, email: user.email },
       process.env.JWT_SECRET!
@@ -26,10 +26,9 @@ router.get(
     if (!token) {
       return apiResponse(res, 500, "Internal server error");
     }
-
-    return apiResponse(res, 201, { token });
+    res.cookie("token", token);
+    return apiResponse(res, 201, "signin successfull");
   }
 );
-
 
 export default router;
