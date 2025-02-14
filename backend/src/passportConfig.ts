@@ -1,6 +1,5 @@
 import passport from "passport";
-import { Strategy as GoogleStartegy } from "passport-google-oauth20";
-import  Jwt  from "jsonwebtoken";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import dotenv from "dotenv";
 import { Prisma } from "./lib/prismaClient";
 
@@ -16,7 +15,7 @@ export function initPassport() {
   }
 
   passport.use(
-    new GoogleStartegy(
+    new GoogleStrategy(
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
@@ -30,22 +29,22 @@ export function initPassport() {
         done: (error: any, user?: any) => void
       ) => {
         try {
-            const user = Prisma.user.upsert({
-                create :{
-                    profileId : profile.id,
-                    name : profile.displayName,
-                    email : profile.emails[0].value
-                },
-                update:{
-                    name : profile.displayName
-                },
-                where:{
-                  email : profile.emails[0].value
-                }
-            })
-            done(null,user)
+          const user = await Prisma.user.upsert({
+            create: {
+              profileId: profile.id,
+              name: profile.displayName,
+              email: profile.emails[0].value,
+            },
+            update: {
+              name: profile.displayName,
+            },
+            where: {
+              email: profile.emails[0].value,
+            },
+          });
+          done(null, user);
         } catch (error) {
-           done(error,null);
+          done(error, null);
         }
       }
     )

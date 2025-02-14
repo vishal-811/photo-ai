@@ -9,24 +9,27 @@ router.get(
   "/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
-
-router.get("/google/callback", (req: Request, res: Response) => {
-  passport.authenticate("google", { session: false }, (error, user) => {
-    if (error || !user) {
-      res.redirect("http://localhost:5173/api/v1/auth/google");
-      return;
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { session: false }),
+  (req: Request, res: Response) : any => {
+    if (!req.user) {
+      return res.redirect("http://localhost:5173/api/v1/auth/google");
     }
-
+    const user = req.user as { id: string; name: string; email : string };
+  
     const token = Jwt.sign(
-      { id: user.id, name: user.displayName, email: user.emails[0].value },
+      { id: user.id, name: user.name, email: user.email },
       process.env.JWT_SECRET!
     );
+
     if (!token) {
       return apiResponse(res, 500, "Internal server error");
     }
 
-    return apiResponse(res, 201, { token: token });
-  });
-});
+    return apiResponse(res, 201, { token });
+  }
+);
+
 
 export default router;
